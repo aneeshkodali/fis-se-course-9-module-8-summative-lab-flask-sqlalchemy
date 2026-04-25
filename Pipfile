@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = ">=3.0"
+Flask-Migrate = ">=4.0"
+flask-sqlalchemy = ">=3.1"
+Werkzeug = ">=3.0"
+importlib-metadata = "6.0.0"
+importlib-resources = "5.10.0"
+ipdb = "*"
+pytest = ">=7.4"
+
+[requires]
+python_full_version = "3.14"
