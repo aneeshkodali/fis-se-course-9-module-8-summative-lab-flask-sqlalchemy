@@ -18,6 +18,13 @@ class Exercise(db.Model):
     # has many with Workout (through WorkoutExercise)
     workouts = db.relationship('Workout', secondary='workout_exercises', back_populates='exercises', viewonly=True)
 
+    # validation
+    @validates('name')
+    def validate_name(self, key, value):
+        if not value or value.strip() == '':
+            raise ValueError('Exercise name must exist')
+        return value
+    
 class Workout(db.Model):
     __tablename__ = 'workouts'
 
@@ -32,9 +39,24 @@ class Workout(db.Model):
     # has many with Exercise (through WorkoutExercise)
     exercises = db.relationship('Exercise', secondary='workout_exercises', back_populates='workouts', viewonly=True)
 
+    # validation
+    @validates('duration_minutes')
+    def validate_duration_minutes(self, key, value):
+        if value <= 0:
+            raise ValueError(f"{key} must be positive")
+        return value
+
 
 class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
+
+    # constraints
+    __table_args__ = (
+        db.UniqueConstraint('workout_id', 'exercise_id', name='unique_workout_exercise'),
+        db.CheckConstraint('reps > 0', name='check_reps_positive'),
+        db.CheckConstraint('sets > 0', name='check_sets_positive'),
+        db.CheckConstraint('duration_seconds > 0', name='check_duration_seconds_positive')
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     workout_id = db.Column(db.Integer, db.ForeignKey('workouts.id'), nullable=False)
@@ -49,3 +71,9 @@ class WorkoutExercise(db.Model):
     # belongs to Exercise
     exercise = db.relationship('Exercise', back_populates='workout_exercises')
 
+    # validation
+    @validates('reps', 'sets', 'duration_seconds')
+    def validate_positive_number(self, key, value):
+        if value is None or value <= 0:
+            raise ValueError(f"{key} must be positive")
+        return value
