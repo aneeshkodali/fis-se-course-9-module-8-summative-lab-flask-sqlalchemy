@@ -16,17 +16,17 @@ class Workout(db.Model):
     __tablename__ = 'workouts'
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, server_default=db.func.now())
-    duration_minutes = db.Column(db.Float, nullable=False)
-    notes = db.Column(db.String)
+    date = db.Column(db.Date, server_default=db.func.now())
+    duration_minutes = db.Column(db.Integer, nullable=False)
+    notes = db.Column(db.Text)
 
 class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
 
-    id = db.Column(db.Integer, primary_key=True),
-    workout_id = db.Column(db.Integer, db.ForeignKey('workouts.id'), nullable=False),
-    exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.id'), nullable=False),
-    reps = db.Column(db.Integer, nullable=False),
-    sets = db.Column(db.Integer, nullable=False),
+    id = db.Column(db.Integer, primary_key=True)
+    workout_id = db.Column(db.Integer, db.ForeignKey('workouts.id'), nullable=False)
+    exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.id'), nullable=False)
+    reps = db.Column(db.Integer, nullable=False)
+    sets = db.Column(db.Integer, nullable=False)
     duration_seconds = db.Column(db.Integer, nullable=False)
 
