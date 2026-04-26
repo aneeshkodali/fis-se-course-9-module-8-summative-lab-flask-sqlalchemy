@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
+from marshmallow import Schema, fields
+
 db = SQLAlchemy()
 
 # Define Models here
@@ -25,6 +27,18 @@ class Exercise(db.Model):
             raise ValueError('Exercise name must exist')
         return value
     
+class ExerciseSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.String()
+    category = fields.String()
+    equipment_needed = fields.Boolean()
+
+    workout_exercises = fields.List(
+        fields.Nested(
+            lambda: WorkoutExerciseSchema(exclude=("exercise",))
+        )
+    )
+    
 class Workout(db.Model):
     __tablename__ = 'workouts'
 
@@ -46,6 +60,17 @@ class Workout(db.Model):
             raise ValueError(f"{key} must be positive")
         return value
 
+class WorkoutSchema(Schema):
+    id = fields.Int(dump_only=True)
+    date = fields.Date()
+    duration_minutes = fields.Int()
+    notes = fields.String()
+
+    workout_exercises = fields.List(
+        fields.Nested(
+            lambda: WorkoutExerciseSchema(exclude=("workout",))
+        )
+    )
 
 class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
@@ -77,3 +102,12 @@ class WorkoutExercise(db.Model):
         if value is None or value <= 0:
             raise ValueError(f"{key} must be positive")
         return value
+
+class WorkoutExerciseSchema(Schema):
+    id = fields.Int(dump_only=True)
+    reps = fields.Int()
+    sets = fields.Int()
+    duration_seconds = fields.Int()
+
+    workout = fields.Nested(lambda: WorkoutSchema(exclude=("workout_exercises",)))
+    exercise = fields.Nested(lambda: ExerciseSchema(exclude=("workout_exercises",)))
