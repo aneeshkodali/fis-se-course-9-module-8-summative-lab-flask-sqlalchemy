@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validates as ma_validates
 
 db = SQLAlchemy()
 
@@ -38,6 +38,13 @@ class ExerciseSchema(Schema):
             lambda: WorkoutExerciseSchema(exclude=("exercise",))
         )
     )
+
+    # validation
+    @ma_validates('name')
+    def validate_name(self, value):
+        if not value or value.strip() == '':
+            raise ValueError("Exercise name must exist")
+        return value
     
 class Workout(db.Model):
     __tablename__ = 'workouts'
@@ -71,6 +78,13 @@ class WorkoutSchema(Schema):
             lambda: WorkoutExerciseSchema(exclude=("workout",))
         )
     )
+
+    # validation
+    @ma_validates('duration_minutes')
+    def validate_duration(self, value):
+        if value is None or value <= 0:
+            raise ValueError("duration_minutes must be positive")
+        return value
 
 class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
@@ -111,3 +125,10 @@ class WorkoutExerciseSchema(Schema):
 
     workout = fields.Nested(lambda: WorkoutSchema(exclude=("workout_exercises",)))
     exercise = fields.Nested(lambda: ExerciseSchema(exclude=("workout_exercises",)))
+
+    # validation
+    @ma_validates('reps', 'sets', 'duration_seconds')
+    def validate_positive(self, value):
+        if value is None or value <= 0:
+            raise ValueError("Values must be positive")
+        return value
