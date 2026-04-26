@@ -96,6 +96,8 @@ def delete_workout(id):
         db.session.delete(workout)
         db.session.commit()
     except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
 
 
     # return
